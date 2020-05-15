@@ -1,13 +1,17 @@
 import React, { Component } from "react";
 import Node from "./Node";
-import { dijkstra } from "../../algorithms/dijkstra";
+import {
+  dijkstra,
+  getNodesInShortestPathOrder_d,
+} from "../../algorithms/dijkstra";
+import { Astar, getNodesInShortestPathOrder_a } from "../../algorithms/a_star";
 
 import "./PathfindingVisualizer.css";
 
 const START_NODE_ROW = 10;
-const START_NODE_COL = 15;
+const START_NODE_COL = 5;
 const FINISH_NODE_ROW = 10;
-const FINISH_NODE_COL = 35;
+const FINISH_NODE_COL = 45;
 
 export default class PathfindingVisualizer extends Component {
   constructor() {
@@ -38,9 +42,24 @@ export default class PathfindingVisualizer extends Component {
     this.setState({ mouseIsPressed: false });
   }
 
-  animateDijkstra(visitedNodesInOrder) {
+  animateShortestPath_d(nodesInShortestPathOrder_d) {
+    for (let i = 0; i < nodesInShortestPathOrder_d.length; i++) {
+      setTimeout(() => {
+        const node = nodesInShortestPathOrder_d[i];
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node-shortest-path";
+      }, 50 * i);
+    }
+  }
+
+  animateAlgorithm_d(visitedNodesInOrder, nodesInShortestPathOrder_d) {
     for (let i = 0; i <= visitedNodesInOrder.length; i++) {
-      if (i === visitedNodesInOrder.length) return;
+      if (i === visitedNodesInOrder.length) {
+        setTimeout(() => {
+          this.animateShortestPath_d(nodesInShortestPathOrder_d);
+        }, 10 * i);
+        return;
+      }
       setTimeout(() => {
         const node = visitedNodesInOrder[i];
         document.getElementById(`node-${node.row}-${node.col}`).className =
@@ -54,7 +73,46 @@ export default class PathfindingVisualizer extends Component {
     const startNode = grid[START_NODE_ROW][START_NODE_COL];
     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
     const visitedNodesInOrder = dijkstra(grid, startNode, finishNode);
-    this.animateDijkstra(visitedNodesInOrder);
+    const nodesInShortestPathOrder_d = getNodesInShortestPathOrder_d(
+      finishNode
+    );
+    this.animateAlgorithm_d(visitedNodesInOrder, nodesInShortestPathOrder_d);
+  }
+
+  animateShortestPath_a(nodesInShortestPathOrder_a) {
+    for (let i = 0; i < nodesInShortestPathOrder_a.length; i++) {
+      setTimeout(() => {
+        const node = nodesInShortestPathOrder_a[i];
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node-shortest-path";
+      }, 50 * i);
+    }
+  }
+
+  animateAlgorithm_a(visitedNodesInOrder, nodesInShortestPathOrder_a) {
+    for (let i = 0; i <= visitedNodesInOrder.length; i++) {
+      if (i === visitedNodesInOrder.length) {
+        setTimeout(() => {
+          this.animateShortestPath_a(nodesInShortestPathOrder_a);
+        }, 10 * i);
+        return;
+      }
+      setTimeout(() => {
+        const node = visitedNodesInOrder[i];
+        document.getElementById(`node-${node.row}-${node.col}`).className =
+          "node node-visited";
+      }, 10 * i);
+    }
+  }
+  visualizeAstar() {
+    const { grid } = this.state;
+    const startNode = grid[START_NODE_ROW][START_NODE_COL];
+    const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL];
+    const visitedNodesInOrder = Astar(grid, startNode, finishNode);
+    const nodesInShortestPathOrder_a = getNodesInShortestPathOrder_a(
+      finishNode
+    );
+    this.animateAlgorithm_a(visitedNodesInOrder, nodesInShortestPathOrder_a);
   }
 
   render() {
@@ -63,8 +121,9 @@ export default class PathfindingVisualizer extends Component {
     return (
       <>
         <button onClick={() => this.visualizeDijkstra()}>
-          Visualize Dijkstra's Algorithm
+          Dijkstra's Algorithm
         </button>
+        <button onClick={() => this.visualizeAstar()}>A* Search</button>
         <div className="grid">
           {grid.map((row, rowIdx) => {
             return (
@@ -117,6 +176,9 @@ const createNode = (col, row) => {
     isVisited: false,
     isWall: false,
     previousNode: null,
+    heuristicDistance: null,
+    totalDistance: Infinity,
+    direction: null,
   };
 };
 const getNewGridWithWallToggled = (grid, row, col) => {
