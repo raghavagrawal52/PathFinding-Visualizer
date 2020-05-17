@@ -42,6 +42,8 @@ export default class PathfindingVisualizer extends Component {
     this.setState({ mouseIsPressed: false });
   }
 
+  //--------------------ANIMATION DIJKSTRA ----------------------
+
   animateShortestPath_d(nodesInShortestPathOrder_d) {
     for (let i = 0; i < nodesInShortestPathOrder_d.length; i++) {
       setTimeout(() => {
@@ -79,6 +81,8 @@ export default class PathfindingVisualizer extends Component {
     this.animateAlgorithm_d(visitedNodesInOrder, nodesInShortestPathOrder_d);
   }
 
+  //--------------------ANIMATION ASTAR ----------------------
+
   animateShortestPath_a(nodesInShortestPathOrder_a) {
     for (let i = 0; i < nodesInShortestPathOrder_a.length; i++) {
       setTimeout(() => {
@@ -114,6 +118,8 @@ export default class PathfindingVisualizer extends Component {
     );
     this.animateAlgorithm_a(visitedNodesInOrder, nodesInShortestPathOrder_a);
   }
+
+  //--------------------OUTPUT ----------------------
 
   render() {
     const { grid, mouseIsPressed } = this.state;
@@ -155,11 +161,14 @@ export default class PathfindingVisualizer extends Component {
     );
   }
 }
+
+//---------------------HELPER FUNCTIONS--------------------
+
 const getInitialGrid = () => {
   const grid = [];
-  for (let row = 0; row < 20; row++) {
+  for (let row = 0; row < 30; row++) {
     const currentRow = [];
-    for (let col = 0; col < 50; col++) {
+    for (let col = 0; col < 70; col++) {
       currentRow.push(createNode(col, row));
     }
     grid.push(currentRow);
@@ -181,6 +190,7 @@ const createNode = (col, row) => {
     direction: null,
   };
 };
+
 const getNewGridWithWallToggled = (grid, row, col) => {
   const newGrid = grid.slice();
   const node = newGrid[row][col];
